@@ -1,13 +1,21 @@
-import { ChangeEvent, useState } from 'react'
-import { Button } from '../Componet/Button'
-import { Display } from '../Componet/Display'
-import { Input } from '../Componet/Input'
+import { ChangeEvent, useEffect, useState } from 'react'
+import { Button } from '../Component/Button'
+import { Display } from '../Component/Display'
+import { Input } from '../Component/Input'
 
 export const Counter = () => {
   let [counter, setCounter] = useState<number>(0)
   let [startValue, setStartValue] = useState(0)
   let [maxValue, setMaxValue] = useState(0)
   let [error, setError] = useState('')
+
+  useEffect(() => {
+    getFromLocalStorage()
+  }, [])
+
+  useEffect(() => {
+    setToLocalStorage()
+  }, [counter])
 
   //устанавливаем стартовое значение в инпуте
   const onChangeStartValueHandler = (e: ChangeEvent<HTMLInputElement>) => {
@@ -24,24 +32,39 @@ export const Counter = () => {
       setMaxValue(Number(value))
     }
   }
-
+  const onClickInc = () => {
+    setCounter(counter + 1)
+  }
   //добавляем в local storage значения
-  const setLocalStorage = () => {
+  const setToLocalStorage = () => {
     localStorage.setItem('StartValue', JSON.stringify(startValue))
     localStorage.setItem('MaxValue', JSON.stringify(maxValue))
+    localStorage.setItem('CounterValue', JSON.stringify(counter))
   }
+  const getFromLocalStorage = () => {
+    let getStartValue = localStorage.getItem('StartValue')
+    if (getStartValue) {
+      setStartValue(JSON.parse(getStartValue))
+    }
+    let getMaxValue = localStorage.getItem('MaxValue')
+    if (getMaxValue) {
+      setMaxValue(JSON.parse(getMaxValue))
+    }
+    let getCounterValue = localStorage.getItem('CounterValue')
+    if (getCounterValue) {
+      setCounter(JSON.parse(getCounterValue))
+    }
+  }
+
   // сохраняем значения нажав на кнопку
   const onClickSaveHandler = () => {
-    setLocalStorage()
+    setToLocalStorage()
     setError('')
     setCounter(startValue)
   }
 
   //стили для табло
 
-  const onClickInc = () => {
-    setCounter(counter + 1)
-  }
   const onClickReset = () => {
     let getValue = localStorage.getItem('StartValue')
     if (getValue) {
@@ -83,7 +106,8 @@ export const Counter = () => {
       <div className="wrapper">
         <div className="display">
           <Input
-            name={'start value:'}
+            value={startValue}
+            name={'start value :'}
             maxValue={maxValue}
             startValue={startValue}
             onFocus={onFocusHandler}
@@ -92,7 +116,8 @@ export const Counter = () => {
           />
           <br />
           <Input
-            name={'max value:'}
+            value={maxValue}
+            name={'max value :'}
             maxValue={maxValue}
             startValue={startValue}
             onFocus={onFocusHandler}
